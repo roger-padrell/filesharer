@@ -1,0 +1,23 @@
+<html>
+<body>
+<iframe style="height:100%; width:100%;overflow:none;" id="res" disabled="disabled"></iframe>
+</body>
+
+<script>
+window.onload = function(){
+let req = new XMLHttpRequest();
+
+req.onreadystatechange = () => {
+  if (req.readyState == XMLHttpRequest.DONE) {
+    dt = JSON.parse(req.responseText);
+	var f = window.location.href.split("?")[1];
+	document.getElementById("res").src = dt[f].dt;
+  }
+};
+
+req.open("GET", "https://api.jsonbin.io/v3/b/65510f820574da7622c5b730/?meta=false", true);
+req.setRequestHeader("X-Master-Key", "$2b$10$i3qJgSD.qkNJRnyjAWq0ZePymTTWgzaBSJzm2nEJn4KpSb6S3/T7K");
+req.send();
+}
+</script>
+</html>

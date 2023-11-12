@@ -1,0 +1,164 @@
+<html>
+<head>
+<title>FileSharer</title>
+</head>
+<body>
+<div id="drop-area">
+  <form class="my-form">
+    <p>Upload file by droping it here or</p>
+    <input type="file" id="fileElem" onchange="handleFiles(this.files)">
+    <label class="button" for="fileElem">Select a file</label>
+  </form>
+</div>
+
+<input style="position:absolute;left: 40%;cursor: not-allowed; width:15%;" type="text" disabled="disabled" id="res"><button style="position:absolute;left:56%;" onclick="copy()">Copy url</button>
+</body>
+<style>
+#drop-area {
+  border: 2px dashed #ccc;
+  border-radius: 20px;
+  width: 480px;
+  font-family: sans-serif;
+  margin: 100px auto;
+  padding: 20px;
+}
+#drop-area.highlight {
+  border-color: purple;
+}
+p {
+  margin-top: 0;
+}
+.my-form {
+  margin-bottom: 10px;
+}
+#gallery {
+  margin-top: 10px;
+}
+#gallery img {
+  width: 150px;
+  margin-bottom: 10px;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+.button {
+  display: inline-block;
+  padding: 10px;
+  background: #ccc;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+.button:hover {
+  background: #ddd;
+}
+#fileElem {
+  display: none;
+}
+
+</style>
+<script>
+var r = document.getElementById("res");
+var dt = {};
+let dropArea = document.getElementById('drop-area')
+;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+  dropArea.addEventListener(eventName, preventDefaults, false)
+})
+
+var n = 1;
+
+function preventDefaults (e) {
+  e.preventDefault()
+  e.stopPropagation()
+}
+;['dragenter', 'dragover'].forEach(eventName => {
+  dropArea.addEventListener(eventName, highlight, false)
+})
+
+;['dragleave', 'drop'].forEach(eventName => {
+  dropArea.addEventListener(eventName, unhighlight, false)
+})
+
+function highlight(e) {
+  dropArea.classList.add('highlight')
+}
+
+function unhighlight(e) {
+  dropArea.classList.remove('highlight')
+}
+dropArea.addEventListener('drop', handleDrop, false)
+
+function handleDrop(e) {
+  let dt = e.dataTransfer
+  let files = dt.files
+
+  handleFiles(files)
+}
+var file = {}
+function handleFiles(files) {
+	r.value = "File loaded, processing..."
+	var f = new FileReader()
+	f.readAsDataURL(files[0]);
+	f.addEventListener("load", function(){
+		file.dt = f.result;
+		file.name = files[0].name;
+		n = Math.floor(Math.random() * 100000000000000);
+		if(!dt[n]){
+			dt[n] = file;
+			upload()
+		}
+		else{
+			n = Math.floor(Math.random() * 100000000000000);
+			dt[n] = file;
+			upload()
+		}
+	})
+}
+
+function uploaded(){
+	r.value = "https://roger-padrell.github.io/filesharer/file?" + n;
+}
+
+window.onload = function(){
+let req = new XMLHttpRequest();
+
+req.onreadystatechange = () => {
+  if (req.readyState == XMLHttpRequest.DONE) {
+    dt = JSON.parse(req.responseText);
+  }
+};
+
+req.open("GET", "https://api.jsonbin.io/v3/b/65510f820574da7622c5b730/?meta=false", true);
+req.setRequestHeader("X-Master-Key", "$2b$10$i3qJgSD.qkNJRnyjAWq0ZePymTTWgzaBSJzm2nEJn4KpSb6S3/T7K");
+req.send();
+}
+
+function upload(){
+let req = new XMLHttpRequest();
+
+req.onreadystatechange = () => {
+  if (req.readyState == XMLHttpRequest.DONE) {
+    uploaded()
+  }
+};
+
+req.open("PUT", "https://api.jsonbin.io/v3/b/65510f820574da7622c5b730", true);
+req.setRequestHeader("Content-Type", "application/json");
+req.setRequestHeader("X-Master-Key", "$2b$10$i3qJgSD.qkNJRnyjAWq0ZePymTTWgzaBSJzm2nEJn4KpSb6S3/T7K");
+req.send(JSON.stringify(dt));
+}
+
+function copy(){
+var copyText = document.getElementById("res");
+
+  // Select the text field
+  copyText.select();
+  copyText.setSelectionRange(0, 99999); // For mobile devices
+
+   // Copy the text inside the text field
+  navigator.clipboard.writeText(copyText.value);
+
+  // Alert the copied text
+  alert("Copied")
+}
+</script>
+</html>
